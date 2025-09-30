@@ -64,6 +64,14 @@ public class LessonService(DataContext context,
             updateLesson.VideoUrl = await file.SaveFileAsync(dto.Video!, "Video");
             updateLesson.UpdatedAt = DateTime.UtcNow;
             var res = await context.SaveChangesAsync();
+            if (res > 0)
+            {
+                Log.Information("lesson updated");
+            }
+            else
+            {
+                Log.Fatal("Lesson not update");
+            }
             return res > 0
                 ? new Response<string>(HttpStatusCode.OK,"lesson updated")
                 : new Response<string>(HttpStatusCode.BadRequest,"lesson not updated");
