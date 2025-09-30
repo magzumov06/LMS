@@ -1,5 +1,6 @@
 ﻿using Domain.Dtos.DiscussionPostDto;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Controllers;
@@ -10,6 +11,7 @@ namespace WebApp.Controllers;
 public class DiscussionPostController(IDiscussionPostService service ) : Controller
 {
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Create(CreateDiscussionDto dto)
     {
         var res = await service.Create(dto);
@@ -17,6 +19,7 @@ public class DiscussionPostController(IDiscussionPostService service ) : Control
     }
 
     [HttpPut]
+    [AllowAnonymous]
     public async Task<IActionResult> Update(UpdateDiscussionDto dto)
     {
         var res = await service.Update(dto);
@@ -24,6 +27,7 @@ public class DiscussionPostController(IDiscussionPostService service ) : Control
     }
 
     [HttpDelete]
+    [AllowAnonymous]
     public async Task<IActionResult> Delete(int id)
     {
         var res = await service.Delete(id);
@@ -31,6 +35,7 @@ public class DiscussionPostController(IDiscussionPostService service ) : Control
     }
 
     [HttpGet("{Id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> Get(int id)
     {
         var res = await service.GetById(id);
@@ -38,6 +43,7 @@ public class DiscussionPostController(IDiscussionPostService service ) : Control
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Get()
     {
         var res = await service.Get();

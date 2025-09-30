@@ -1,12 +1,12 @@
 ﻿using System.Net;
 using AutoMapper;
-using Domain.Dtos.QuestionDto;
 using Domain.Dtos.QuizDto;
 using Domain.Entities;
 using Domain.Responces;
 using Infrastructure.Data.DataContext;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Infrastructure.Services;
 
@@ -17,6 +17,7 @@ public class QuizService(DataContext context,
     {
         try
         {
+            Log.Information("Creating Quiz");
            var quiz = mapper.Map<Quiz>(dto);
            quiz.CreatedAt = DateTime.UtcNow;
            quiz.UpdatedAt = DateTime.UtcNow;
@@ -27,6 +28,7 @@ public class QuizService(DataContext context,
         }
         catch (Exception e)
         {
+            Log.Error("Error creating Quiz");
             return new  Response<string>(HttpStatusCode.InternalServerError, e.Message);
         }
     }
@@ -35,6 +37,7 @@ public class QuizService(DataContext context,
     {
         try
         {
+            Log.Information("Updating Quiz");
             var quiz = await context.Quizzes.FirstOrDefaultAsync(x=>x.Id == dto.Id);
             if (quiz == null) return new  Response<string>(HttpStatusCode.NotFound,"Quiz not found");
             quiz.UpdatedAt = DateTime.UtcNow;
@@ -45,6 +48,7 @@ public class QuizService(DataContext context,
         }
         catch (Exception e)
         {
+            Log.Error("Error updating Quiz");
             return new  Response<string>(HttpStatusCode.InternalServerError, e.Message);
         }
     }
@@ -53,6 +57,7 @@ public class QuizService(DataContext context,
     {
         try
         {
+            Log.Information("Deleting Quiz");
             var quiz = await context.Quizzes.FirstOrDefaultAsync(x => x.Id == id);
             if (quiz == null) return new  Response<string>(HttpStatusCode.NotFound,"Quiz not found");
             context.Quizzes.Remove(quiz);
@@ -63,6 +68,7 @@ public class QuizService(DataContext context,
         }
         catch (Exception e)
         {
+            Log.Error("Error deleting Quiz");
             return new Response<string>(HttpStatusCode.InternalServerError, e.Message);
         }
     }
@@ -71,12 +77,14 @@ public class QuizService(DataContext context,
     {
         try
         {
+            Log.Information("Getting Quiz");
             var quiz = await context.Quizzes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             if (quiz == null) return new Response<GetQuizDto>(HttpStatusCode.NotFound,"Quiz not found");
             return new Response<GetQuizDto>(mapper.Map<GetQuizDto>(quiz));
         }
         catch (Exception e)
         {
+            Log.Error("Error getting Quiz");
             return new  Response<GetQuizDto>(HttpStatusCode.InternalServerError, e.Message);
         }
     }
@@ -85,6 +93,7 @@ public class QuizService(DataContext context,
     {
         try
         {
+            Log.Information("Getting Quizs");
             var quizs = await context.Quizzes.ToListAsync();
             if(quizs.Count == 0) return new  Response<List<GetQuizDto>>(HttpStatusCode.NotFound,"Quiz not found");
             var dtos = quizs.Select(x=>new GetQuizDto()
@@ -100,6 +109,7 @@ public class QuizService(DataContext context,
         }
         catch (Exception e)
         {
+            Log.Error("Error getting Quizs");
             return new  Response<List<GetQuizDto>>(HttpStatusCode.InternalServerError, e.Message);
         }
     }

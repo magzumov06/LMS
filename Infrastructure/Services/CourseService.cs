@@ -25,7 +25,7 @@ public class CourseService(DataContext context,
             await context.Courses.AddAsync(entity);
             await context.SaveChangesAsync();
             var created = await context.Courses.AsNoTracking().FirstAsync(c=>c.Id == entity.Id);
-            return new Response<string>(mapper.Map<string>(created));
+            return new Response<string>(HttpStatusCode.Created,"Course created");
         }
         catch (Exception e)
         {

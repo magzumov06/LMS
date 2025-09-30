@@ -1,9 +1,11 @@
 using System.Text;
+using AutoMapper;
 using Domain.Entities;
 using Infrastructure.Data.DataContext;
 using Infrastructure.Data.Seeder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Domain.Dtos.Email;
+using Infrastructure.FileStorage;
 using Infrastructure.Interfaces;
 using Infrastructure.Profiles;
 using Infrastructure.Services;
@@ -37,11 +39,15 @@ builder.Services.AddAutoMapper(typeof(AppProfile));
 builder.Services.AddScoped<DataContext>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<ILessonService, LessonService>();
+builder.Services.AddScoped<ILessonService>(sp => new LessonService(
+    sp.GetRequiredService<DataContext>(),
+    sp.GetRequiredService<IFileStorageService>()));
 builder.Services.AddScoped<IProgresService, ProgresService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IDiscussionPostService, DiscussionPostService>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -111,6 +117,9 @@ builder.Services.AddAuthorization(opt => { opt.AddPolicy("AdminOnly", p => p.Req
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IFileStorageService>(
+    sp => new FileStorageService(builder.Environment.ContentRootPath));
 
 var app = builder.Build();
 

@@ -5,6 +5,7 @@ using Domain.Entities;
 using Domain.Filter;
 using Domain.Responces;
 using Infrastructure.Data.DataContext;
+using Infrastructure.FileStorage;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -12,20 +13,31 @@ using Serilog;
 namespace Infrastructure.Services;
 
 public class LessonService(DataContext context,
-    IMapper mapper) : ILessonService
+    IFileStorageService file) : ILessonService
 {
     public async Task<Response<string>> CreateLesson(CreateLessonDto dto)
     {
         try
         {
             Log.Information("Creating lesson");
-            var lesson = mapper.Map<Lesson>(dto);
-            lesson.CreatedAt = DateTime.UtcNow;
-            lesson.UpdatedAt = DateTime.UtcNow;
-            context.Lessons.Add(lesson);
-            await context.SaveChangesAsync();
-            var created = await context.Lessons.AsNoTracking().FirstAsync(l=>l.Id==lesson.Id);
-            return new Response<string>(mapper.Map<string>(lesson));
+            var newLesson = new Lesson
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                OrderIndex = dto.OrderIndex,
+                CourseId = dto.CourseId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            if (dto.Video != null)
+            {
+                newLesson.VideoUrl = await file.SaveFileAsync(dto.Video, "Video");
+            }
+            await context.Lessons.AddAsync(newLesson);
+            var res = await context.SaveChangesAsync();
+            return res > 0
+                ?new Response<string>(HttpStatusCode.Created,"lesson created")
+                : new Response<string>(HttpStatusCode.BadRequest,"error");
         }
         catch (Exception e)
         {
@@ -39,13 +51,22 @@ public class LessonService(DataContext context,
         try
         {
             Log.Information("Updating lesson");
-            var updateLesson = await context.Lessons.FirstOrDefaultAsync(x=> x.Id == dto.Id);
-            if (updateLesson == null) return new Response<string>(HttpStatusCode.NotFound, "Lesson not found");
+            var updateLesson = await context.Lessons.FirstOrDefaultAsync(x=>x.Id == dto.Id);
+            if(updateLesson == null) return new Response<string>(HttpStatusCode.NotFound,"lesson not found");
+            if (dto.Video != null)
+            {
+                await file.DeleteFileAsync(updateLesson.VideoUrl!);
+                
+            }
+            updateLesson.Title = dto.Title;
+            updateLesson.Content = dto.Content;
+            updateLesson.OrderIndex = dto.OrderIndex;
+            updateLesson.VideoUrl = await file.SaveFileAsync(dto.Video!, "Video");
             updateLesson.UpdatedAt = DateTime.UtcNow;
-            mapper.Map(dto, updateLesson);
-            await context.SaveChangesAsync();
-            var update = await context.Lessons.AsNoTracking().FirstAsync(l => l.Id == dto.Id);
-            return new Response<string>(mapper.Map<string>(update));
+            var res = await context.SaveChangesAsync();
+            return res > 0
+                ? new Response<string>(HttpStatusCode.OK,"lesson updated")
+                : new Response<string>(HttpStatusCode.BadRequest,"lesson not updated");
         }
         catch (Exception e)
         {
@@ -87,9 +108,20 @@ public class LessonService(DataContext context,
         try
         {
             Log.Information("Getting lesson");
-            var lesson = await context.Lessons.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lessonId);
-            if(lesson == null) return new Response<GetLessonDto>(HttpStatusCode.NotFound, "Lesson not found");
-            return new Response<GetLessonDto>(mapper.Map<GetLessonDto>(lesson));
+           var lesson = await context.Lessons.FirstOrDefaultAsync(x => x.Id == lessonId && x.IsDeleted == false);
+           if (lesson == null) return new Response<GetLessonDto>(HttpStatusCode.NotFound, "Lesson not found");
+           var dto = new GetLessonDto()
+           {
+               Id = lesson.Id,
+               Title = lesson.Title,
+               Content = lesson.Content,
+               VideoUrl = lesson.VideoUrl,
+               OrderIndex = lesson.OrderIndex,
+               CourseId = lesson.CourseId,
+               CreatedAt = lesson.CreatedAt,
+               UpdatedAt = lesson.UpdatedAt,
+           };
+           return new Response<GetLessonDto>(dto);
         }
         catch (Exception e)
         {
@@ -140,7 +172,6 @@ public class LessonService(DataContext context,
                 Title = x.Title,
                 Content = x.Content,
                 VideoUrl = x.VideoUrl,
-                FileUrl = x.FileUrl,
                 OrderIndex = x.OrderIndex,
                 CourseId = x.CourseId,
                 CreatedAt = x.CreatedAt,

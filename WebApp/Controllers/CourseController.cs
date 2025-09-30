@@ -12,7 +12,7 @@ namespace WebApp.Controllers;
 public class CourseController(ICourseService service) : Controller
 {
     [HttpPost]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> CreateCourse(CreateCourseDto dto)
     {
         var res = await service.CreateCourse(dto);
@@ -20,7 +20,7 @@ public class CourseController(ICourseService service) : Controller
     }
 
     [HttpPut]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> UpdateCourse(UpdateCourseDto dto)
     {
         var res = await service.UpdateCourse(dto);

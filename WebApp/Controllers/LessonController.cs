@@ -12,15 +12,15 @@ namespace WebApp.Controllers;
 public class LessonController(ILessonService service) : Controller
 {
     [HttpPost]
-    [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> CreateLesson(CreateLessonDto dto)
+    [Authorize(Roles = "Teacher,SuperAdmin")]
+    public async Task<IActionResult> CreateLesson([FromForm]CreateLessonDto dto)
     {
         var res = await service.CreateLesson(dto);
         return Ok(res);
     }
 
     [HttpPut]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> UpdateLesson(UpdateLessonDto dto)
     {
         var res = await service.UpdateLesson(dto);
@@ -28,7 +28,7 @@ public class LessonController(ILessonService service) : Controller
     }
 
     [HttpDelete]
-    [Authorize(Roles = "Teacher, SuperAdmin, Admin")]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteLesson(int id)
     {
         var res = await service.DeleteLesson(id);

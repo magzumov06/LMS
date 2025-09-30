@@ -16,14 +16,9 @@ public class AppProfile :  Profile
     public AppProfile()
     {
         //Course AutoMapper
-        CreateMap<CreateCourseDto, Course>();
-        CreateMap<UpdateCourseDto, Course>();
-        CreateMap<Course,GetCourseDto>();
-        
-        //Lesson AutoMapper
-        CreateMap<CreateLessonDto, Lesson>();
-        CreateMap<UpdateLessonDto, Lesson>();
-        CreateMap<Lesson,GetLessonDto>();
+        CreateMap<CreateCourseDto, Course>().ReverseMap();
+        CreateMap<UpdateCourseDto, Course>().ReverseMap();
+        CreateMap<Course,GetCourseDto>().ReverseMap();
         
         //Answer AutoMapper
         CreateMap<CreateAnswerDto,  Answer>();

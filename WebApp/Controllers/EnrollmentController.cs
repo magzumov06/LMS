@@ -12,6 +12,7 @@ namespace WebApp.Controllers;
 public class EnrollmentController(IEnrollmentService service) :  Controller
 {
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateEnrollment(CreateEnrollmentDto dto)
     {
         var res = await service.CreateEnrollment(dto);
@@ -19,6 +20,7 @@ public class EnrollmentController(IEnrollmentService service) :  Controller
     }
 
     [HttpPut]
+    [Authorize]
     public async Task<IActionResult> UpdateEnrollment(UpdateEnrollmentDto dto)
     {
         var res = await service.UpdateEnrollment(dto);
@@ -26,6 +28,7 @@ public class EnrollmentController(IEnrollmentService service) :  Controller
     }
 
     [HttpDelete]
+    [Authorize]
     public async Task<IActionResult> DeleteEnrollment(int id)
     {
         var res = await service.DeleteEnrollment(id);
@@ -33,6 +36,7 @@ public class EnrollmentController(IEnrollmentService service) :  Controller
     }
 
     [HttpGet("{studentId}")]
+    [Authorize]
     public async Task<IActionResult> GetEnrollmentsByStudentId(int studentId)
     {
         var res = await service.GetEnrollmentBystudentId(studentId);

@@ -1,5 +1,6 @@
 ﻿using Domain.Dtos.QuestionDto;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Controllers;
@@ -10,6 +11,7 @@ namespace WebApp.Controllers;
 public class QuestionController(IQuestionService service) : Controller
 {
     [HttpPost]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> CreateQuestion(CreateQuestionDto dto)
     {
         var res =  await service.CreateQuestion(dto);
@@ -17,6 +19,7 @@ public class QuestionController(IQuestionService service) : Controller
     }
 
     [HttpPut]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> UpdateQuestion(UpdateQuestionDto dto)
     {
         var res = await service.UpdateQuestion(dto);
@@ -24,6 +27,7 @@ public class QuestionController(IQuestionService service) : Controller
     }
 
     [HttpDelete]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> DeleteQuestion(int id)
     {
         var res = await service.DeleteQuestion(id);

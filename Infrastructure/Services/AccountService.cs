@@ -7,6 +7,7 @@ using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace Infrastructure.Services;
 
@@ -20,6 +21,7 @@ public class AccountService(
     {
         try
         {
+            Log.Information("Login");
             var user = await userManager.FindByNameAsync(login.Username);
             if (user == null)
                 return new Response<string>(HttpStatusCode.BadRequest, "Your username or  password is incorrect");
@@ -31,6 +33,7 @@ public class AccountService(
         }
         catch
         {
+            Log.Error("Error in logging");
             return new Response<string>(HttpStatusCode.InternalServerError, "Something went wrong");
         }
     }
@@ -39,6 +42,7 @@ public class AccountService(
     {
         try
         {
+            Log.Information("Register");
             var exists = await userManager.FindByNameAsync(register.UserName);
             if (exists != null)
                 return new Response<string>(HttpStatusCode.BadRequest, "Username already exists");
@@ -76,20 +80,30 @@ public class AccountService(
         }
         catch (Exception)
         {
+            Log.Error("Error in registering");
             return new Response<string>(HttpStatusCode.InternalServerError, "Something went wrong");
         }
     }
 
     public async Task<Response<string>> ChangePassword(ChangePasswordDto changePassword)
     {
-        var userClaims = httpContextAccessor.HttpContext?.User.FindFirst("UserId")?.Value
-                         ?? httpContextAccessor.HttpContext?.User.FindFirst("NameId")?.Value;
-        var userId = int.TryParse(userClaims, out var id);
+        try
+        {
+            Log.Information("ChangePassword");
+            var userClaims = httpContextAccessor.HttpContext?.User.FindFirst("UserId")?.Value
+                             ?? httpContextAccessor.HttpContext?.User.FindFirst("NameId")?.Value;
+            var userId = int.TryParse(userClaims, out var id);
 
-        var user = userManager.Users.FirstOrDefault(x => x.Id == id);
-        if (user == null) return new Response<string>(HttpStatusCode.BadRequest, "Something went wrong");
-        var res = await userManager.ChangePasswordAsync(user, changePassword.OldPassword, changePassword.Password);
-        if (res.Succeeded) return new Response<string>(HttpStatusCode.OK, "Your password has been changed");
-        return new Response<string>(HttpStatusCode.InternalServerError, "Something went wrong");
+            var user = userManager.Users.FirstOrDefault(x => x.Id == id);
+            if (user == null) return new Response<string>(HttpStatusCode.BadRequest, "Something went wrong");
+            var res = await userManager.ChangePasswordAsync(user, changePassword.OldPassword, changePassword.Password);
+            if (res.Succeeded) return new Response<string>(HttpStatusCode.OK, "Your password has been changed");
+            return new Response<string>(HttpStatusCode.InternalServerError, "Something went wrong");
+        }
+        catch (Exception e)
+        {
+            Log.Error("Error in changing password");
+            return new Response<string>(HttpStatusCode.InternalServerError, "Something went wrong");
+        }
     }
 }

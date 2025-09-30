@@ -28,7 +28,7 @@ public class AnswerService(DataContext context,
         }
         catch (Exception e)
         {
-            Log.Error("Error creating answer");
+            Log.Error("Error in CreateAnswer");
             return new Response<string>(HttpStatusCode.InternalServerError,e.Message);
         }
     }
@@ -76,7 +76,7 @@ public class AnswerService(DataContext context,
         }
         catch (Exception e)
         {
-            Log.Error("Error deleting answer");
+            Log.Error("Error in DeleteAnswer");
             return new Response<string>(HttpStatusCode.InternalServerError,e.Message);
         }
     }
@@ -92,7 +92,7 @@ public class AnswerService(DataContext context,
         }
         catch (Exception e)
         {
-            Log.Error("Error getting answer by id");
+            Log.Error("Error in GetAnswerById");
             return new Response<GetAnswerDto>(HttpStatusCode.InternalServerError,e.Message);
         }
     }
@@ -117,7 +117,7 @@ public class AnswerService(DataContext context,
         }
         catch (Exception e)
         {
-            Log.Error("Error in Get Answers");
+            Log.Error("Error in GetAnswers");
             return new Response<List<GetAnswerDto>>(HttpStatusCode.InternalServerError,e.Message);
         }
     }

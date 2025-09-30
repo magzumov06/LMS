@@ -1,5 +1,6 @@
 ﻿using Domain.Dtos.Email;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Controllers;
@@ -8,6 +9,7 @@ namespace WebApp.Controllers;
 public class SendEmailController(IEmailService service): Controller
 {
     [HttpPost]
+    [Authorize(Roles = "Teacher,SuperAdmin")]
     public async Task<IActionResult> SendEmail(SendEmailDto dto)
     {
        await service.SendAsync(dto);
